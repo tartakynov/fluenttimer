@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace LoggerBlogger.BestPractice
+namespace LoggerBlogger.Timing
 {
     public class SimpleTimer
     {

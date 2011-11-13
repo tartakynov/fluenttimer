@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LoggerBlogger.BestPractice
+namespace LoggerBlogger.Timing
 {
     public class FluentTimer
     {
