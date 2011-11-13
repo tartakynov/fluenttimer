@@ -5,24 +5,49 @@ namespace LoggerBlogger.Timing
 {
     public class SimpleTimer
     {
-        private System.Threading.Timer _timer;
+        private Timer _timer;
 
-        private readonly Action _action;
+        private Action _action;
 
         private readonly AutoResetEvent _stopEvent = new AutoResetEvent(false);
 
-        public SimpleTimer(TimeSpan period, Action action)
+        protected SimpleTimer()
         {
-            _action = action;
-            Action async = delegate()
-                           {
-                               using (_timer = new System.Threading.Timer(TimerCallback, null, 0, (int)(period.TotalSeconds * 1000)))
+            
+        }
+
+        /// <summary>
+        /// Calls action at exact time0
+        /// </summary>
+        public static SimpleTimer ScheduledTimer(TimeSpan time, Action action)
+        {
+            return PeriodicTimer(TimeSpan.FromMinutes(1), delegate
+                                                               {
+                                                                  // Console.WriteLine("{0} {1}", (DateTime.Now.TimeOfDay - time).TotalMinutes, (int)Math.Round((DateTime.Now.TimeOfDay - time).TotalMinutes));
+                                                                   if (((int)DateTime.Now.TimeOfDay.TotalMinutes - (int)time.TotalMinutes) == 0)
+                                                                       action();
+                                                               });
+        }
+
+        /// <summary>
+        /// Calls action with specified period
+        /// </summary>
+        public static SimpleTimer PeriodicTimer(TimeSpan period, Action action)
+        {
+            var timer = new SimpleTimer
+                            {
+                                _action = action
+                            };
+            Action async = delegate
                                {
-                                   // wait for a call to stop
-                                   _stopEvent.WaitOne();
-                               }
-                           };
+                                   using (timer._timer = new Timer(timer.TimerCallback, null, 0, (int) (period.TotalSeconds*1000)))
+                                   {
+                                       // wait for a call to stop
+                                       timer._stopEvent.WaitOne();
+                                   }
+                               };
             async.BeginInvoke(null, null);
+            return timer;
         }
 
         /// <summary>

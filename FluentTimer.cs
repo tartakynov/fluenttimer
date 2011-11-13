@@ -8,9 +8,20 @@ namespace LoggerBlogger.Timing
     {
         protected readonly ICollection<TimeSpan> Times;
 
+        protected Boolean IsPeriodic = true;
+
         protected FluentTimer()
         {
             Times = new List<TimeSpan>();
+        }
+
+        public static FluentTimersTimeChoose At(Int32 timeValue)
+        {
+            var timer = new FluentTimer
+            {
+                IsPeriodic = false
+            };
+            return new FluentTimersTimeChoose(timer, timeValue, timer.Times);
         }
 
         public static FluentTimersTimeChoose Each(Int32 timeValue)
@@ -26,7 +37,8 @@ namespace LoggerBlogger.Timing
 
         public SimpleTimer Call(Action action)
         {
-            return new SimpleTimer(Times.Aggregate((t1, t2) => t1.Add(t2)), action);
+            var time = Times.Aggregate((t1, t2) => t1.Add(t2));
+            return IsPeriodic ? SimpleTimer.PeriodicTimer(time, action) : SimpleTimer.ScheduledTimer(time, action);
         }
     }
 }

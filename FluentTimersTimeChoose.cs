@@ -42,5 +42,9 @@ namespace LoggerBlogger.Timing
             return _timer;
         }
 
+        public FluentTimer OClock()
+        {
+            return Hours();
+        }
     }
 }
