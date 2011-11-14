@@ -7,7 +7,7 @@ namespace LoggerBlogger.Timing
     {
         private Timer _timer;
 
-        private Action _action;
+        private Action<SimpleTimer> _action;
 
         private readonly AutoResetEvent _stopEvent = new AutoResetEvent(false);
 
@@ -16,23 +16,28 @@ namespace LoggerBlogger.Timing
             
         }
 
+        protected SimpleTimer(TimeSpan time, Action<SimpleTimer> action)
+        {
+            PeriodicTimer(TimeSpan.FromMinutes(1), delegate
+            {
+                // Console.WriteLine("{0} {1}", (DateTime.Now.TimeOfDay - time).TotalMinutes, (int)Math.Round((DateTime.Now.TimeOfDay - time).TotalMinutes));
+                if (((int)DateTime.Now.TimeOfDay.TotalMinutes - (int)time.TotalMinutes) == 0)
+                    action(this);
+            });
+        }
+
         /// <summary>
         /// Calls action at exact time0
         /// </summary>
-        public static SimpleTimer ScheduledTimer(TimeSpan time, Action action)
+        public static SimpleTimer ScheduledTimer(TimeSpan time, Action<SimpleTimer> action)
         {
-            return PeriodicTimer(TimeSpan.FromMinutes(1), delegate
-                                                               {
-                                                                  // Console.WriteLine("{0} {1}", (DateTime.Now.TimeOfDay - time).TotalMinutes, (int)Math.Round((DateTime.Now.TimeOfDay - time).TotalMinutes));
-                                                                   if (((int)DateTime.Now.TimeOfDay.TotalMinutes - (int)time.TotalMinutes) == 0)
-                                                                       action();
-                                                               });
+            return new SimpleTimer(time, action);
         }
 
         /// <summary>
         /// Calls action with specified period
         /// </summary>
-        public static SimpleTimer PeriodicTimer(TimeSpan period, Action action)
+        public static SimpleTimer PeriodicTimer(TimeSpan period, Action<SimpleTimer> action)
         {
             var timer = new SimpleTimer
                             {
@@ -60,7 +65,7 @@ namespace LoggerBlogger.Timing
 
         private void TimerCallback(Object state)
         {
-            _action();
+            _action(this);
         }
     }
 }

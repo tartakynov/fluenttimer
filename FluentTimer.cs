@@ -38,7 +38,13 @@ namespace LoggerBlogger.Timing
         public SimpleTimer Call(Action action)
         {
             var time = Times.Aggregate((t1, t2) => t1.Add(t2));
-            return IsPeriodic ? SimpleTimer.PeriodicTimer(time, action) : SimpleTimer.ScheduledTimer(time, action);
+            return IsPeriodic ? SimpleTimer.PeriodicTimer(time, t => action()) : SimpleTimer.ScheduledTimer(time, t => action());
+        }
+
+        public SimpleTimer Call(Action<SimpleTimer> action)
+        {
+            var time = Times.Aggregate((t1, t2) => t1.Add(t2));
+            return IsPeriodic ? SimpleTimer.PeriodicTimer(time, action) : SimpleTimer.ScheduledTimer(time, action);            
         }
     }
 }
